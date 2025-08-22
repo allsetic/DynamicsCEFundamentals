@@ -1,13 +1,13 @@
 using System;
+using System.Linq;
 using Microsoft.Xrm.Sdk;
 
-namespace PrimerPlugin
+namespace MyFirstPlugin
 {
     public class AccountUpdatePlugin : IPlugin
     {
         public void Execute(IServiceProvider serviceProvider)
         {
-
             var context = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
 
             if (context.MessageName != "Update")
@@ -18,9 +18,12 @@ namespace PrimerPlugin
                 if (entity.LogicalName != "account")
                     return;
 
-                if (entity.Attributes.Contains("name") && string.IsNullOrWhiteSpace(entity["name"].ToString()))
+                if (entity.Attributes.Contains("parentaccountid"))
                 {
-                    throw new InvalidPluginExecutionException("Account name is required.");
+                    if (entity["parentaccountid"] == null)
+                    {
+                        throw new InvalidPluginExecutionException("Parent account is required.");
+                    }
                 }
 
                 if (entity.Attributes.Contains("telephone1"))
@@ -32,10 +35,11 @@ namespace PrimerPlugin
 
                         var message = $"Telephone updated, before: '{oldPhone}', after: '{newPhone}'.";
 
-                        entity["new_updatecomment"] = message;
+                        entity["myc_updatecomment"] = message;
                     }
                 }
             }
         }
     }
+
 }
